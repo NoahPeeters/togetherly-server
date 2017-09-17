@@ -1,10 +1,11 @@
 import socket
 import sys
 from thread import start_new_thread
-import random
 import time
 from pyparsing import *
+from random import random
 import os
+import colorsys
 
 BASE_PATH = '/var/togetherly-server/'
 HOST = '' # all availabe interfaces
@@ -106,9 +107,13 @@ def parseMessageData(data):
     return lists
     return OneOrMore(nestedExpr()).parseString(data)
 
-def randomColor():
-    r = lambda: random.randint(0,255)
-    return '#%02X%02X%02X' % (r(),r(),r())
+def hsv_to_hex(h, s, v):
+    rgb = colorsys.hsv_to_rgb(h, s, v)
+    return '#%02X%02X%02X' % (rgb[0] * 255.0, rgb[1] * 255.0, rgb[2] * 255.0)
+
+def randomColors():
+    h = random()
+    return (hsv_to_hex(h, 1.0, 0.6), hsv_to_hex(h, 1.0, 0.25))
 
 def broadcast(msg):
     for client in clients:
@@ -158,8 +163,9 @@ def main():
 class Client:
     def __init__(self, conn):
         self.conn = conn
-        self.rcolor = randomColor()
-        self.pcolor = randomColor()
+        colors = randomColors()
+        self.pcolor = colors[0]
+        self.rcolor = colors[1]
         self.mark = "nil"
         self.position = "0"
         self.name = ""
